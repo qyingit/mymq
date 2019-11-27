@@ -544,7 +544,7 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
 
         final RemotingCommand response = RemotingCommand.createResponseCommand(GetBrokerConfigResponseHeader.class);
         final GetBrokerConfigResponseHeader responseHeader = (GetBrokerConfigResponseHeader) response.readCustomHeader();
-
+        //从内存中获取配置信息
         String content = this.brokerController.getConfiguration().getAllConfigsFormatString();
         if (content != null && content.length() > 0) {
             try {

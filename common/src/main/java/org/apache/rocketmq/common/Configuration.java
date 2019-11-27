@@ -261,6 +261,7 @@ public class Configuration {
         StringBuilder stringBuilder = new StringBuilder();
 
         // reload from config object ?
+        //从配置中获取
         for (Object configObject : this.configObjectList) {
             Properties properties = MixAll.object2Properties(configObject);
             if (properties != null) {
