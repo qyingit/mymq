@@ -667,6 +667,7 @@ public class DefaultMessageStore implements MessageStore {
     public long getMinOffsetInQueue(String topic, int queueId) {
         ConsumeQueue logic = this.findConsumeQueue(topic, queueId);
         if (logic != null) {
+            //获取最小offfset
             return logic.getMinOffsetInQueue();
         }
 

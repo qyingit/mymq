@@ -604,7 +604,7 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
         final GetMinOffsetResponseHeader responseHeader = (GetMinOffsetResponseHeader) response.readCustomHeader();
         final GetMinOffsetRequestHeader requestHeader =
             (GetMinOffsetRequestHeader) request.decodeCommandCustomHeader(GetMinOffsetRequestHeader.class);
-
+        //查找最小offset
         long offset = this.brokerController.getMessageStore().getMinOffsetInQueue(requestHeader.getTopic(), requestHeader.getQueueId());
 
         responseHeader.setOffset(offset);
