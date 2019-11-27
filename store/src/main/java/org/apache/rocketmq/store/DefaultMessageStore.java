@@ -786,11 +786,14 @@ public class DefaultMessageStore implements MessageStore {
 
     @Override
     public long getEarliestMessageTime(String topic, int queueId) {
+        //查询queue
         ConsumeQueue logicQueue = this.findConsumeQueue(topic, queueId);
         if (logicQueue != null) {
+            //获取最小的offset
             long minLogicOffset = logicQueue.getMinLogicOffset();
-
+            //根据小标获取SelectMappedBufferResult
             SelectMappedBufferResult result = logicQueue.getIndexBuffer(minLogicOffset / ConsumeQueue.CQ_STORE_UNIT_SIZE);
+            //根据SelectMappedBufferResult找到存储时间
             return getStoreTime(result);
         }
 

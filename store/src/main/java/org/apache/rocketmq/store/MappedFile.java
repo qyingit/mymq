@@ -402,8 +402,11 @@ public class MappedFile extends ReferenceResource {
         int readPosition = getReadPosition();
         if (pos < readPosition && pos >= 0) {
             if (this.hold()) {
+                //获取butebuffer
                 ByteBuffer byteBuffer = this.mappedByteBuffer.slice();
+                //起始位置
                 byteBuffer.position(pos);
+                //可操作空间
                 int size = readPosition - pos;
                 ByteBuffer byteBufferNew = byteBuffer.slice();
                 byteBufferNew.limit(size);
