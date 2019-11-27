@@ -653,12 +653,14 @@ public class DefaultMessageStore implements MessageStore {
     }
 
     public long getMaxOffsetInQueue(String topic, int queueId) {
+        //根据topic与queue找到消费队列
         ConsumeQueue logic = this.findConsumeQueue(topic, queueId);
         if (logic != null) {
+            //获取最大offset
             long offset = logic.getMaxOffsetInQueue();
             return offset;
         }
-
+        //不存在队列返回0
         return 0;
     }
 

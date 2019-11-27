@@ -39,6 +39,7 @@ public class MappedFileQueue {
 
     private final int mappedFileSize;
 
+    //线程并发安全的存储映射文件
     private final CopyOnWriteArrayList<MappedFile> mappedFiles = new CopyOnWriteArrayList<MappedFile>();
 
     private final AllocateMappedFileService allocateMappedFileService;
@@ -301,10 +302,13 @@ public class MappedFileQueue {
     }
 
     public long getMaxOffset() {
+        //获取存储映射文件队列中索引位置最大的文件
         MappedFile mappedFile = getLastMappedFile();
         if (mappedFile != null) {
+            //获取映射文件的索引与刻度索引的位置
             return mappedFile.getFileFromOffset() + mappedFile.getReadPosition();
         }
+        //没有返回0
         return 0;
     }
 
