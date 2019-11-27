@@ -59,7 +59,7 @@ public class ConsumeQueue {
         String queueDir = this.storePath
             + File.separator + topic
             + File.separator + queueId;
-
+        //消息队列
         this.mappedFileQueue = new MappedFileQueue(queueDir, mappedFileSize, null);
 
         this.byteBufferIndex = ByteBuffer.allocate(CQ_STORE_UNIT_SIZE);
@@ -152,6 +152,7 @@ public class ConsumeQueue {
     }
 
     public long getOffsetInQueueByTime(final long timestamp) {
+        //根据时间可以找到映射文件  文件可以知道最后一次修改的时间
         MappedFile mappedFile = this.mappedFileQueue.getMappedFileByTime(timestamp);
         if (mappedFile != null) {
             long offset = 0;
@@ -159,6 +160,7 @@ public class ConsumeQueue {
             int high = 0;
             int midOffset = -1, targetOffset = -1, leftOffset = -1, rightOffset = -1;
             long leftIndexValue = -1L, rightIndexValue = -1L;
+            //获取最小物理偏移量
             long minPhysicOffset = this.defaultMessageStore.getMinPhyOffset();
             SelectMappedBufferResult sbr = mappedFile.selectMappedBuffer(0);
             if (null != sbr) {
@@ -176,6 +178,7 @@ public class ConsumeQueue {
                             continue;
                         }
 
+                        //按物理offset从commitLog获取存储时间
                         long storeTime =
                             this.defaultMessageStore.getCommitLog().pickupStoreTimestamp(phyOffset, size);
                         if (storeTime < 0) {
@@ -213,6 +216,7 @@ public class ConsumeQueue {
 
                     return (mappedFile.getFileFromOffset() + offset) / CQ_STORE_UNIT_SIZE;
                 } finally {
+                    //映射文件释放
                     sbr.release();
                 }
             }

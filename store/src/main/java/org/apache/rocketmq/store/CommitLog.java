@@ -804,6 +804,7 @@ public class CommitLog {
             SelectMappedBufferResult result = this.getMessage(offset, size);
             if (null != result) {
                 try {
+                    //获取消息的时间戳
                     return result.getByteBuffer().getLong(MessageDecoder.MESSAGE_STORE_TIMESTAMP_POSTION);
                 } finally {
                     result.release();
@@ -818,8 +819,10 @@ public class CommitLog {
         MappedFile mappedFile = this.mappedFileQueue.getFirstMappedFile();
         if (mappedFile != null) {
             if (mappedFile.isAvailable()) {
+                //获取映射文件起始偏移量
                 return mappedFile.getFileFromOffset();
             } else {
+                //获取下个文件的起始偏移量
                 return this.rollNextFile(mappedFile.getFileFromOffset());
             }
         }
@@ -829,6 +832,7 @@ public class CommitLog {
 
     public SelectMappedBufferResult getMessage(final long offset, final int size) {
         int mappedFileSize = this.defaultMessageStore.getMessageStoreConfig().getMappedFileSizeCommitLog();
+        //根据offset找到文件
         MappedFile mappedFile = this.mappedFileQueue.findMappedFileByOffset(offset, offset == 0);
         if (mappedFile != null) {
             int pos = (int) (offset % mappedFileSize);

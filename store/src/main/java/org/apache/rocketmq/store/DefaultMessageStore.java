@@ -690,8 +690,10 @@ public class DefaultMessageStore implements MessageStore {
     }
 
     public long getOffsetInQueueByTime(String topic, int queueId, long timestamp) {
+        //根据Topic查找出队列
         ConsumeQueue logic = this.findConsumeQueue(topic, queueId);
         if (logic != null) {
+            //按时间查询offset
             return logic.getOffsetInQueueByTime(timestamp);
         }
 
@@ -775,6 +777,7 @@ public class DefaultMessageStore implements MessageStore {
 
     @Override
     public long getMinPhyOffset() {
+        //获取最小偏移量
         return this.commitLog.getMinOffset();
     }
 
@@ -1130,6 +1133,7 @@ public class DefaultMessageStore implements MessageStore {
     }
 
     public ConsumeQueue findConsumeQueue(String topic, int queueId) {
+        //根据topic查询queue
         ConcurrentMap<Integer, ConsumeQueue> map = consumeQueueTable.get(topic);
         if (null == map) {
             ConcurrentMap<Integer, ConsumeQueue> newMap = new ConcurrentHashMap<Integer, ConsumeQueue>(128);
@@ -1140,13 +1144,16 @@ public class DefaultMessageStore implements MessageStore {
                 map = newMap;
             }
         }
-
+        //queueId查找出消费者队列
         ConsumeQueue logic = map.get(queueId);
         if (null == logic) {
+            //找不到就新建队列
+            //消费者队列存储地址 "user.home"/"store
             ConsumeQueue newLogic = new ConsumeQueue(
                 topic,
                 queueId,
                 StorePathConfigHelper.getStorePathConsumeQueue(this.messageStoreConfig.getStorePathRootDir()),
+                //文件默认30m
                 this.getMessageStoreConfig().getMappedFileSizeConsumeQueue(),
                 this);
             ConsumeQueue oldLogic = map.putIfAbsent(queueId, newLogic);
