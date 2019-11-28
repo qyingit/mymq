@@ -200,12 +200,15 @@ public class RebalanceLockManager {
         try {
             this.lock.lockInterruptibly();
             try {
+                //从缓存中获取消息队列
                 ConcurrentHashMap<MessageQueue, LockEntry> groupValue = this.mqLockTable.get(group);
                 if (null != groupValue) {
                     for (MessageQueue mq : mqs) {
                         LockEntry lockEntry = groupValue.get(mq);
                         if (null != lockEntry) {
+                            //clientId相同才能移除
                             if (lockEntry.getClientId().equals(clientId)) {
+                                //移除锁
                                 groupValue.remove(mq);
                                 log.info("unlockBatch, Group: {} {} {}",
                                     group,

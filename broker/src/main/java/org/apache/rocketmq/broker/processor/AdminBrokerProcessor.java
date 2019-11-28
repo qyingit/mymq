@@ -669,6 +669,7 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
         final RemotingCommand response = RemotingCommand.createResponseCommand(null);
         UnlockBatchRequestBody requestBody = UnlockBatchRequestBody.decode(request.getBody(), UnlockBatchRequestBody.class);
 
+        //批量为消息解锁
         this.brokerController.getRebalanceLockManager().unlockBatch(
             requestBody.getConsumerGroup(),
             requestBody.getMqSet(),
