@@ -98,10 +98,13 @@ public class RebalanceLockManager {
     }
 
     private boolean isLocked(final String group, final MessageQueue mq, final String clientId) {
+        //缓存中获取消息队列集合
         ConcurrentHashMap<MessageQueue, LockEntry> groupValue = this.mqLockTable.get(group);
         if (groupValue != null) {
+            //找到消息队列的锁信息
             LockEntry lockEntry = groupValue.get(mq);
             if (lockEntry != null) {
+                //如果锁更新时间
                 boolean locked = lockEntry.isLocked(clientId);
                 if (locked) {
                     lockEntry.setLastUpdateTimestamp(System.currentTimeMillis());
@@ -120,6 +123,7 @@ public class RebalanceLockManager {
         Set<MessageQueue> notLockedMqs = new HashSet<MessageQueue>(mqs.size());
 
         for (MessageQueue mq : mqs) {
+            //当前消息队列是否锁定
             if (this.isLocked(group, mq, clientId)) {
                 lockedMqs.add(mq);
             } else {
@@ -132,6 +136,7 @@ public class RebalanceLockManager {
                 this.lock.lockInterruptibly();
                 try {
                     ConcurrentHashMap<MessageQueue, LockEntry> groupValue = this.mqLockTable.get(group);
+                    //如果消息队列没有锁
                     if (null == groupValue) {
                         groupValue = new ConcurrentHashMap<>(32);
                         this.mqLockTable.put(group, groupValue);
@@ -139,6 +144,7 @@ public class RebalanceLockManager {
 
                     for (MessageQueue mq : notLockedMqs) {
                         LockEntry lockEntry = groupValue.get(mq);
+                        //没有锁创建锁
                         if (null == lockEntry) {
                             lockEntry = new LockEntry();
                             lockEntry.setClientId(clientId);
@@ -158,6 +164,7 @@ public class RebalanceLockManager {
 
                         String oldClientId = lockEntry.getClientId();
 
+                        //如果被其他clientId锁定，并且没有过期则不能上锁
                         if (lockEntry.isExpired()) {
                             lockEntry.setClientId(clientId);
                             lockEntry.setLastUpdateTimestamp(System.currentTimeMillis());
@@ -256,6 +263,7 @@ public class RebalanceLockManager {
             return eq && !this.isExpired();
         }
 
+        //判断时间是否过期
         public boolean isExpired() {
             boolean expired =
                 (System.currentTimeMillis() - this.lastUpdateTimestamp) > REBALANCE_LOCK_MAX_LIVE_TIME;
