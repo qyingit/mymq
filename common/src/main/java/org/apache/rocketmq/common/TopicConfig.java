@@ -19,13 +19,19 @@ package org.apache.rocketmq.common;
 import org.apache.rocketmq.common.constant.PermName;
 
 public class TopicConfig {
+    //分割符
     private static final String SEPARATOR = " ";
+    //默认读队列
     public static int defaultReadQueueNums = 16;
+    //默认写队列
     public static int defaultWriteQueueNums = 16;
+    //topic名字
     private String topicName;
     private int readQueueNums = defaultReadQueueNums;
     private int writeQueueNums = defaultWriteQueueNums;
+    //权限
     private int perm = PermName.PERM_READ | PermName.PERM_WRITE;
+    //topic过滤类型
     private TopicFilterType topicFilterType = TopicFilterType.SINGLE_TAG;
     private int topicSysFlag = 0;
     private boolean order = false;

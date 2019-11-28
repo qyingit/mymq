@@ -885,12 +885,14 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
 
         Set<String> topics = new HashSet<String>();
         if (UtilAll.isBlank(requestHeader.getTopic())) {
+            //获取消费者组所在组的topic
             topics = this.brokerController.getConsumerOffsetManager().whichTopicByConsumer(requestHeader.getConsumerGroup());
         } else {
             topics.add(requestHeader.getTopic());
         }
 
         for (String topic : topics) {
+            //按topic名称从本地缓存获取topic信息
             TopicConfig topicConfig = this.brokerController.getTopicConfigManager().selectTopicConfig(topic);
             if (null == topicConfig) {
                 log.warn("consumeStats, topic config not exist, {}", topic);
@@ -898,6 +900,7 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
             }
 
             {
+                //按消费者组与topic获取订阅数据
                 SubscriptionData findSubscriptionData =
                     this.brokerController.getConsumerManager().findSubscriptionData(requestHeader.getConsumerGroup(), topic);
 
@@ -907,7 +910,7 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
                     continue;
                 }
             }
-
+                //获取的读队列数量
             for (int i = 0; i < topicConfig.getReadQueueNums(); i++) {
                 MessageQueue mq = new MessageQueue();
                 mq.setTopic(topic);
@@ -915,7 +918,7 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
                 mq.setQueueId(i);
 
                 OffsetWrapper offsetWrapper = new OffsetWrapper();
-
+                //tpioc与queue查询消费者的offset
                 long brokerOffset = this.brokerController.getMessageStore().getMaxOffsetInQueue(topic, i);
                 if (brokerOffset < 0)
                     brokerOffset = 0;
@@ -932,6 +935,7 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
 
                 long timeOffset = consumerOffset - 1;
                 if (timeOffset >= 0) {
+                    //查询最后的时间
                     long lastTimestamp = this.brokerController.getMessageStore().getMessageStoreTimeStamp(topic, i, timeOffset);
                     if (lastTimestamp > 0) {
                         offsetWrapper.setLastTimestamp(lastTimestamp);
@@ -940,7 +944,7 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
 
                 consumeStats.getOffsetTable().put(mq, offsetWrapper);
             }
-
+            //按消费组获取消费者的tps
             double consumeTps = this.brokerController.getBrokerStatsManager().tpsGroupGetNums(requestHeader.getConsumerGroup(), topic);
 
             consumeTps += consumeStats.getConsumeTps();

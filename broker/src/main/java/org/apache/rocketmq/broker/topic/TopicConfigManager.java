@@ -149,6 +149,7 @@ public class TopicConfigManager extends ConfigManager {
     }
 
     public TopicConfig selectTopicConfig(final String topic) {
+        //从topic缓存信息查询topic的配置信息
         return this.topicConfigTable.get(topic);
     }
 

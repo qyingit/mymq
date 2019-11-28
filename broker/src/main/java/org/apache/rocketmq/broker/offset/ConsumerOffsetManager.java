@@ -84,7 +84,7 @@ public class ConsumerOffsetManager extends ConfigManager {
 
     public Set<String> whichTopicByConsumer(final String group) {
         Set<String> topics = new HashSet<String>();
-
+        //遍历消费者组，topic的缓存信息
         Iterator<Entry<String, ConcurrentMap<Integer, Long>>> it = this.offsetTable.entrySet().iterator();
         while (it.hasNext()) {
             Entry<String, ConcurrentMap<Integer, Long>> next = it.next();
