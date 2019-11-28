@@ -843,13 +843,17 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
         final GetProducerConnectionListRequestHeader requestHeader =
             (GetProducerConnectionListRequestHeader) request.decodeCommandCustomHeader(GetProducerConnectionListRequestHeader.class);
 
+        //构建生产者链接信息
         ProducerConnection bodydata = new ProducerConnection();
         HashMap<Channel, ClientChannelInfo> channelInfoHashMap =
+                //从生产缓存中获取上产者链接信息
             this.brokerController.getProducerManager().getGroupChannelTable().get(requestHeader.getProducerGroup());
         if (channelInfoHashMap != null) {
+            //遍历channelInfo信息
             Iterator<Map.Entry<Channel, ClientChannelInfo>> it = channelInfoHashMap.entrySet().iterator();
             while (it.hasNext()) {
                 ClientChannelInfo info = it.next().getValue();
+                //构建生产者链接
                 Connection connection = new Connection();
                 connection.setClientId(info.getClientId());
                 connection.setLanguage(info.getLanguage());
