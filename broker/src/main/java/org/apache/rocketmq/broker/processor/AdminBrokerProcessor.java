@@ -685,7 +685,7 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
         final RemotingCommand response = RemotingCommand.createResponseCommand(null);
 
         log.info("updateAndCreateSubscriptionGroup called by {}", RemotingHelper.parseChannelRemoteAddr(ctx.channel()));
-
+        //订阅组信息
         SubscriptionGroupConfig config = RemotingSerializable.decode(request.getBody(), SubscriptionGroupConfig.class);
         if (config != null) {
             this.brokerController.getSubscriptionGroupManager().updateSubscriptionGroupConfig(config);
@@ -699,6 +699,7 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
     private RemotingCommand getAllSubscriptionGroup(ChannelHandlerContext ctx,
         RemotingCommand request) throws RemotingCommandException {
         final RemotingCommand response = RemotingCommand.createResponseCommand(null);
+        //获取订阅组所有配置
         String content = this.brokerController.getSubscriptionGroupManager().encode();
         if (content != null && content.length() > 0) {
             try {
@@ -730,7 +731,7 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
             (DeleteSubscriptionGroupRequestHeader) request.decodeCommandCustomHeader(DeleteSubscriptionGroupRequestHeader.class);
 
         log.info("deleteSubscriptionGroup called by {}", RemotingHelper.parseChannelRemoteAddr(ctx.channel()));
-
+        //删除订阅组
         this.brokerController.getSubscriptionGroupManager().deleteSubscriptionGroupConfig(requestHeader.getGroupName());
 
         response.setCode(ResponseCode.SUCCESS);
@@ -745,13 +746,14 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
             (GetTopicStatsInfoRequestHeader) request.decodeCommandCustomHeader(GetTopicStatsInfoRequestHeader.class);
 
         final String topic = requestHeader.getTopic();
+        //从topic配置信息缓存中获取topic配置信息
         TopicConfig topicConfig = this.brokerController.getTopicConfigManager().selectTopicConfig(topic);
         if (null == topicConfig) {
             response.setCode(ResponseCode.TOPIC_NOT_EXIST);
             response.setRemark("topic[" + topic + "] not exist");
             return response;
         }
-
+        //组装topic的配置信息
         TopicStatsTable topicStatsTable = new TopicStatsTable();
         for (int i = 0; i < topicConfig.getWriteQueueNums(); i++) {
             MessageQueue mq = new MessageQueue();
@@ -759,17 +761,21 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
             mq.setBrokerName(this.brokerController.getBrokerConfig().getBrokerName());
             mq.setQueueId(i);
 
+            //组装topic的offset信息
             TopicOffset topicOffset = new TopicOffset();
+            //获取最小offset
             long min = this.brokerController.getMessageStore().getMinOffsetInQueue(topic, i);
             if (min < 0)
                 min = 0;
 
+            //获取最大的offset
             long max = this.brokerController.getMessageStore().getMaxOffsetInQueue(topic, i);
             if (max < 0)
                 max = 0;
 
             long timestamp = 0;
             if (max > 0) {
+                //根据topic，queueId，offset查询offset的储存时间
                 timestamp = this.brokerController.getMessageStore().getMessageStoreTimeStamp(topic, i, max - 1);
             }
 

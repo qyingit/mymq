@@ -97,15 +97,16 @@ public class SubscriptionGroupManager extends ConfigManager {
     }
 
     public void updateSubscriptionGroupConfig(final SubscriptionGroupConfig config) {
+        //将订阅组名字 与订阅组配置放到缓存中
         SubscriptionGroupConfig old = this.subscriptionGroupTable.put(config.getGroupName(), config);
         if (old != null) {
             log.info("update subscription group config, old: {} new: {}", old, config);
         } else {
             log.info("create new subscription group, {}", config);
         }
-
+        //更新版本号
         this.dataVersion.nextVersion();
-
+        //持久化
         this.persist();
     }
 
@@ -179,10 +180,13 @@ public class SubscriptionGroupManager extends ConfigManager {
     }
 
     public void deleteSubscriptionGroupConfig(final String groupName) {
+        //从缓存中移除
         SubscriptionGroupConfig old = this.subscriptionGroupTable.remove(groupName);
         if (old != null) {
             log.info("delete subscription group OK, subscription group:{}", old);
+            //更新版本号
             this.dataVersion.nextVersion();
+            //持久化
             this.persist();
         } else {
             log.warn("delete subscription group failed, subscription groupName: {} not exist", groupName);
