@@ -282,8 +282,10 @@ public abstract class NettyRemotingAbstract {
      * @param ctx channel handler context.
      * @param cmd response command instance.
      */
+    //响应消息处理
     public void processResponseCommand(ChannelHandlerContext ctx, RemotingCommand cmd) {
         final int opaque = cmd.getOpaque();
+        //从响应表设置响应的信息
         final ResponseFuture responseFuture = responseTable.get(opaque);
         if (responseFuture != null) {
             responseFuture.setResponseCommand(cmd);
@@ -410,25 +412,30 @@ public abstract class NettyRemotingAbstract {
 
         try {
             final ResponseFuture responseFuture = new ResponseFuture(channel, opaque, timeoutMillis, null, null);
+            //缓存正在进行的响应
             this.responseTable.put(opaque, responseFuture);
+            //获取远程地址
             final SocketAddress addr = channel.remoteAddress();
             channel.writeAndFlush(request).addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture f) throws Exception {
+                    //发送成功
                     if (f.isSuccess()) {
                         responseFuture.setSendRequestOK(true);
                         return;
                     } else {
+                        //发送失败
                         responseFuture.setSendRequestOK(false);
                     }
 
                     responseTable.remove(opaque);
                     responseFuture.setCause(f.cause());
+                    //响应解析完毕会解除countDownLatch的阻塞
                     responseFuture.putResponse(null);
                     log.warn("send a request command to channel <" + addr + "> failed.");
                 }
             });
-
+            //使用countDownLatch实现的阻塞
             RemotingCommand responseCommand = responseFuture.waitResponse(timeoutMillis);
             if (null == responseCommand) {
                 if (responseFuture.isSendRequestOK()) {

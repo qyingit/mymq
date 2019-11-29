@@ -24,6 +24,7 @@ import org.apache.rocketmq.remoting.protocol.RemotingSerializable;
 
 @Deprecated
 public class GetConsumerStatusBody extends RemotingSerializable {
+    //消费者队列
     private Map<MessageQueue, Long> messageQueueTable = new HashMap<MessageQueue, Long>();
     private Map<String, Map<MessageQueue, Long>> consumerTable =
         new HashMap<String, Map<MessageQueue, Long>>();

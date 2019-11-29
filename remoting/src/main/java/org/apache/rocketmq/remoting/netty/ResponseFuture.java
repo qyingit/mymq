@@ -25,18 +25,25 @@ import org.apache.rocketmq.remoting.common.SemaphoreReleaseOnlyOnce;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
 public class ResponseFuture {
+    //请求数
     private final int opaque;
+    //通信channel
     private final Channel processChannel;
+    //时间
     private final long timeoutMillis;
+    //回调
     private final InvokeCallback invokeCallback;
+    //开始时间
     private final long beginTimestamp = System.currentTimeMillis();
     private final CountDownLatch countDownLatch = new CountDownLatch(1);
-
+    //信号量
     private final SemaphoreReleaseOnlyOnce once;
 
     private final AtomicBoolean executeCallbackOnlyOnce = new AtomicBoolean(false);
     private volatile RemotingCommand responseCommand;
+    //发送ok
     private volatile boolean sendRequestOK = true;
+    //失败原因
     private volatile Throwable cause;
 
     public ResponseFuture(Channel channel, int opaque, long timeoutMillis, InvokeCallback invokeCallback,

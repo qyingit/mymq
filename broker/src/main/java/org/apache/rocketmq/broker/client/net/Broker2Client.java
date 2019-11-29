@@ -244,14 +244,15 @@ public class Broker2Client {
 
         Map<String, Map<MessageQueue, Long>> consumerStatusTable =
             new HashMap<String, Map<MessageQueue, Long>>();
-        ConcurrentMap<Channel, ClientChannelInfo> channelInfoTable =
-            this.brokerController.getConsumerManager().getConsumerGroupInfo(group).getChannelInfoTable();
+        //获取消费者组信息
+        ConcurrentMap<Channel, ClientChannelInfo> channelInfoTable = this.brokerController.getConsumerManager().getConsumerGroupInfo(group).getChannelInfoTable();
         if (null == channelInfoTable || channelInfoTable.isEmpty()) {
             result.setCode(ResponseCode.SYSTEM_ERROR);
             result.setRemark(String.format("No Any Consumer online in the consumer group: [%s]", group));
             return result;
         }
 
+        //对每个消费者获取信息
         for (Map.Entry<Channel, ClientChannelInfo> entry : channelInfoTable.entrySet()) {
             int version = entry.getValue().getVersion();
             String clientId = entry.getValue().getClientId();
@@ -273,7 +274,8 @@ public class Broker2Client {
                                 GetConsumerStatusBody body =
                                     GetConsumerStatusBody.decode(response.getBody(),
                                         GetConsumerStatusBody.class);
-
+                                //对消费者响应的消息进行组装
+                                //包含status ，topic  group  远程地址信息
                                 consumerStatusTable.put(clientId, body.getMessageQueueTable());
                                 log.info(
                                     "[get-consumer-status] get consumer status success. topic={}, group={}, channelRemoteAddr={}",

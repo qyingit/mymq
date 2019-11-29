@@ -1049,7 +1049,7 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
 
         log.info("[get-consumer-status] get consumer status by {}. topic={}, group={}",
             RemotingHelper.parseChannelRemoteAddr(ctx.channel()), requestHeader.getTopic(), requestHeader.getGroup());
-
+        //获取消费者状态
         return this.brokerController.getBroker2Client().getConsumeStatus(requestHeader.getTopic(), requestHeader.getGroup(),
             requestHeader.getClientAddr());
     }
