@@ -99,10 +99,12 @@ public class FilterServerManager {
     }
 
     public void registerFilterServer(final Channel channel, final String filterServerAddr) {
+        //拿channel从缓存中查询Server信息
         FilterServerInfo filterServerInfo = this.filterServerTable.get(channel);
         if (filterServerInfo != null) {
             filterServerInfo.setLastUpdateTimestamp(System.currentTimeMillis());
         } else {
+            //将server信息注册到表中
             filterServerInfo = new FilterServerInfo();
             filterServerInfo.setFilterServerAddr(filterServerAddr);
             filterServerInfo.setLastUpdateTimestamp(System.currentTimeMillis());
