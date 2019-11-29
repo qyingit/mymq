@@ -103,10 +103,10 @@ public class ConsumerOffsetManager extends ConfigManager {
 
         return topics;
     }
-
+    //按topic从offset信息中查询消费组
     public Set<String> whichGroupByTopic(final String topic) {
         Set<String> groups = new HashSet<String>();
-
+        //遍历topic和组offset信息
         Iterator<Entry<String, ConcurrentMap<Integer, Long>>> it = this.offsetTable.entrySet().iterator();
         while (it.hasNext()) {
             Entry<String, ConcurrentMap<Integer, Long>> next = it.next();

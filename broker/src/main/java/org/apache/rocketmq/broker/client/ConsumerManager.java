@@ -177,9 +177,11 @@ public class ConsumerManager {
 
     public HashSet<String> queryTopicConsumeByWho(final String topic) {
         HashSet<String> groups = new HashSet<>();
+        //遍历缓存中消费者组信息
         Iterator<Entry<String, ConsumerGroupInfo>> it = this.consumerTable.entrySet().iterator();
         while (it.hasNext()) {
             Entry<String, ConsumerGroupInfo> entry = it.next();
+            //获取组中缓存的额订阅信息
             ConcurrentMap<String, SubscriptionData> subscriptionTable =
                 entry.getValue().getSubscriptionTable();
             if (subscriptionTable.containsKey(topic)) {

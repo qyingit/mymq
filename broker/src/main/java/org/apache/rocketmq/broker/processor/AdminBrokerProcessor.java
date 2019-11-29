@@ -213,7 +213,7 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
                 //获取消费者状态
             case RequestCode.INVOKE_BROKER_TO_GET_CONSUMER_STATUS:
                 return this.getConsumerStatus(ctx, request);
-                //查询消费者是谁
+                //查询topic被哪些消费者消费
             case RequestCode.QUERY_TOPIC_CONSUME_BY_WHO:
                 return this.queryTopicConsumeByWho(ctx, request);
                 //注册过滤server
@@ -1059,7 +1059,7 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
         final RemotingCommand response = RemotingCommand.createResponseCommand(null);
         QueryTopicConsumeByWhoRequestHeader requestHeader =
             (QueryTopicConsumeByWhoRequestHeader) request.decodeCommandCustomHeader(QueryTopicConsumeByWhoRequestHeader.class);
-
+        //根据topic查询消费者组信息
         HashSet<String> groups = this.brokerController.getConsumerManager().queryTopicConsumeByWho(requestHeader.getTopic());
 
         Set<String> groupInOffset = this.brokerController.getConsumerOffsetManager().whichGroupByTopic(requestHeader.getTopic());
