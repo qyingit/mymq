@@ -1032,10 +1032,12 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
         boolean isC = false;
         LanguageCode language = request.getLanguage();
         switch (language) {
+            //如果是c语言
             case CPP:
                 isC = true;
                 break;
         }
+        //重置消费者的offset
         return this.brokerController.getBroker2Client().resetOffset(requestHeader.getTopic(), requestHeader.getGroup(),
             requestHeader.getTimestamp(), requestHeader.isForce(), isC);
     }

@@ -107,7 +107,7 @@ public class Broker2Client {
     public RemotingCommand resetOffset(String topic, String group, long timeStamp, boolean isForce,
                                        boolean isC) {
         final RemotingCommand response = RemotingCommand.createResponseCommand(null);
-
+        //从topic缓存中获取topic配置信息
         TopicConfig topicConfig = this.brokerController.getTopicConfigManager().selectTopicConfig(topic);
         if (null == topicConfig) {
             log.error("[reset-offset] reset offset failed, no topic in this broker. topic={}", topic);
@@ -124,28 +124,33 @@ public class Broker2Client {
             mq.setTopic(topic);
             mq.setQueueId(i);
 
-            long consumerOffset =
-                this.brokerController.getConsumerOffsetManager().queryOffset(group, topic, i);
+            //查询消费的offset
+            long consumerOffset = this.brokerController.getConsumerOffsetManager().queryOffset(group, topic, i);
+            //如果offset为-1则不存在
             if (-1 == consumerOffset) {
                 response.setCode(ResponseCode.SYSTEM_ERROR);
                 response.setRemark(String.format("THe consumer group <%s> not exist", group));
                 return response;
             }
 
+            //查询时间戳
             long timeStampOffset;
             if (timeStamp == -1) {
-
+                //如果没有传恢复的默认时间,就获取消费的最大offset
                 timeStampOffset = this.brokerController.getMessageStore().getMaxOffsetInQueue(topic, i);
             } else {
+                //有时间，就查询时间的offset
                 timeStampOffset = this.brokerController.getMessageStore().getOffsetInQueueByTime(topic, i, timeStamp);
             }
-
+            //小于0时offset为0
             if (timeStampOffset < 0) {
                 log.warn("reset offset is invalid. topic={}, queueId={}, timeStampOffset={}", topic, i, timeStampOffset);
                 timeStampOffset = 0;
             }
 
+
             if (isForce || timeStampOffset < consumerOffset) {
+                //设置较小的offset
                 offsetTable.put(mq, timeStampOffset);
             } else {
                 offsetTable.put(mq, consumerOffset);
@@ -161,6 +166,7 @@ public class Broker2Client {
         if (isC) {
             // c++ language
             ResetOffsetBodyForC body = new ResetOffsetBodyForC();
+            //转换offset的集合
             List<MessageQueueForC> offsetList = convertOffsetTable2OffsetList(offsetTable);
             body.setOffsetTable(offsetList);
             request.setBody(body.encode());
@@ -171,16 +177,16 @@ public class Broker2Client {
             request.setBody(body.encode());
         }
 
-        ConsumerGroupInfo consumerGroupInfo =
-            this.brokerController.getConsumerManager().getConsumerGroupInfo(group);
+        //从缓存中获取消费组信息
+        ConsumerGroupInfo consumerGroupInfo = this.brokerController.getConsumerManager().getConsumerGroupInfo(group);
 
         if (consumerGroupInfo != null && !consumerGroupInfo.getAllChannel().isEmpty()) {
-            ConcurrentMap<Channel, ClientChannelInfo> channelInfoTable =
-                consumerGroupInfo.getChannelInfoTable();
+            ConcurrentMap<Channel, ClientChannelInfo> channelInfoTable = consumerGroupInfo.getChannelInfoTable();
             for (Map.Entry<Channel, ClientChannelInfo> entry : channelInfoTable.entrySet()) {
                 int version = entry.getValue().getVersion();
                 if (version >= MQVersion.Version.V3_0_7_SNAPSHOT.ordinal()) {
                     try {
+                        //重置offset请求
                         this.brokerController.getRemotingServer().invokeOneway(entry.getKey(), request, 5000);
                         log.info("[reset-offset] reset offset success. topic={}, group={}, clientId={}",
                             topic, group, entry.getValue().getClientId());
