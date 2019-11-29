@@ -961,6 +961,7 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
     private RemotingCommand getAllConsumerOffset(ChannelHandlerContext ctx, RemotingCommand request) {
         final RemotingCommand response = RemotingCommand.createResponseCommand(null);
 
+        //获取消费者offset的json编码
         String content = this.brokerController.getConsumerOffsetManager().encode();
         if (content != null && content.length() > 0) {
             try {
