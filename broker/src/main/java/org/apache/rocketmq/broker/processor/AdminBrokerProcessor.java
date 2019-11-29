@@ -989,6 +989,7 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
     private RemotingCommand getAllDelayOffset(ChannelHandlerContext ctx, RemotingCommand request) {
         final RemotingCommand response = RemotingCommand.createResponseCommand(null);
 
+        //只有defaultmessage支持消息延迟
         if (!(this.brokerController.getMessageStore() instanceof DefaultMessageStore)) {
             log.error("Delay offset not supported in this messagetore, client: {} ", ctx.channel().remoteAddress());
             response.setCode(ResponseCode.SYSTEM_ERROR);
@@ -996,6 +997,7 @@ public class AdminBrokerProcessor implements NettyRequestProcessor {
             return response;
         }
 
+        //消息编码
         String content = ((DefaultMessageStore) this.brokerController.getMessageStore()).getScheduleMessageService().encode();
         if (content != null && content.length() > 0) {
             try {
